@@ -33,6 +33,12 @@ class TriviaTestCase(unittest.TestCase):
     TODO
     Write at least one test for each test for successful operation and for expected errors.
     """
+#tests client request and evaluate response
+
+    def test_given_behavior(self):
+        """Test _____________ """
+        res = self.client().get('/')
+        self.assertEqual(res.status_code, 200)
 
 
 # Make the tests conveniently executable
