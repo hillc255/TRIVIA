@@ -164,32 +164,45 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
-  @app.route('/questions', methods=['POST'])
-  def create_question():
-    body = request.get_json()
+  @app.route('/questions/add', methods=['POST'])
+  def add_question():
+        
+    new_question = request.json.get('question', None)
+    new_answer = request.json.get('answer', None)
+    new_category = request.json.get('category', None)
+    new_difficulty = request.json.get('difficulty', None)
 
-    new_question = body.get('question', None)
-    new_answer = body.get('answer', None)
-    new_difficulty = body.get('difficulty', None)
-    new_category = body.get('category', None)
-
-    questions = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
-    
     try:
+      questions = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
       questions.insert()
 
-      selection = Question.query.order_by(Question.id).all()
-      current_questions = paginate_questions(request, selection)
+      #selection = Question.query.order_by(Question.id).all()
+      #current_questions = paginate_questions(request, selection)
 
       return jsonify({
-        'success': True,
-        'created': questions.id,
-        'questions': current_questions,
-        'total_questions': len(Question.query.all())
+        'success': True
+        #'created': question.id,
+        #'questions': current_questions,
+        #'total_questions': len(Question.query.all())
       })
 
     except:
       abort(422)
+
+      # data = {
+    #   'question': request.json.get['question'],
+    #   'answer': request.json.get['answer'],
+    #   'category': request.json.get['category'],
+    #   'difficulty': request.json.get['difficulty']
+    # }
+    
+    # question = Question(**data)
+    # question.insert()
+    
+    # result = {
+    #   'success': True,
+    # }
+    # return jsonify(result)
 
   '''
   @TODO: 
@@ -201,8 +214,8 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
-  @app.route('/questions', methods=['POST'])
-  def create_question():
+  @app.route('/questions/{id}', methods=['GET','POST'])
+  def search_question():
     body = request.get_json()
 
     new_question = body.get('question', None)
