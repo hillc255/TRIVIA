@@ -131,6 +131,27 @@ def create_app(test_config=None):
   TEST: When you click the trash icon next to a question, the question will be removed.
   This removal will persist in the database and when you refresh the page. 
   '''
+  @app.route('/questions/<int:id>', methods=['DELETE'])
+  def delete_question(id):
+    try:
+      question = Question.query.filter(Question.id == id).one_or_none()
+
+      if question is None:
+        abort(404)
+
+      question.delete()
+      selection = Question.query.order_by(Question.id).all()
+      current_questions = paginate_questions(request, selection)
+
+      return jsonify({
+        'success': True,
+        'deleted': id,
+        'questions': current_questions,
+        'total_questions': len(Question.query.all())
+      })
+
+    except:
+      abort(422)
 
   '''
   @TODO: 
@@ -143,6 +164,33 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
+  @app.route('/questions', methods=['POST'])
+  def create_question():
+    body = request.get_json()
+
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_difficulty = body.get('difficulty', None)
+    new_category = body.get('category', None)
+
+    questions = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
+    
+    try:
+      questions.insert()
+
+      selection = Question.query.order_by(Question.id).all()
+      current_questions = paginate_questions(request, selection)
+
+      return jsonify({
+        'success': True,
+        'created': questions.id,
+        'questions': current_questions,
+        'total_questions': len(Question.query.all())
+      })
+
+    except:
+      abort(422)
+
   '''
   @TODO: 
   Create a POST endpoint to get questions based on a search term. 
@@ -153,6 +201,42 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
+  @app.route('/questions', methods=['POST'])
+  def create_question():
+    body = request.get_json()
+
+    new_question = body.get('question', None)
+    new_answer = body.get('answer', None)
+    new_difficulty = body.get('difficulty', None)
+    new_category = body.get('category', None)
+    search = body.get('search', None)
+
+    try:
+      if search:
+        selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
+        current_questions = paginate_questions(request, selection)
+
+        return jsonify({
+          'success': True,
+          'questions': current_questions,
+          'total_questions': len(selection.all())
+        })
+      else:
+        questions = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
+        questions.insert()
+
+        selection = Question.query.order_by(Question.id).all()
+        current_questions = paginate_questions(request, selection)
+
+        return jsonify({
+          'success': True,
+          'created': questions.id,
+          'questions': current_questions,
+          'total_questions': len(Question.query.all())
+        })
+
+    except:
+      abort(422)
 
   '''
   @TODO: 
