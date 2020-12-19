@@ -164,7 +164,7 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
-  @app.route('/questions/add', methods=['POST'])
+  @app.route('/questions', methods=['POST'])
   def add_question():
         
     new_question = request.json.get('question', None)
@@ -173,17 +173,17 @@ def create_app(test_config=None):
     new_difficulty = request.json.get('difficulty', None)
 
     try:
-      questions = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+      question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
       questions.insert()
 
-      #selection = Question.query.order_by(Question.id).all()
-      #current_questions = paginate_questions(request, selection)
+      selection = Question.query.order_by(Question.id).all()
+      current_questions = paginate_questions(request, selection)
 
       return jsonify({
-        'success': True
-        #'created': question.id,
-        #'questions': current_questions,
-        #'total_questions': len(Question.query.all())
+        'success': True,
+        'added_question': question,
+        'total_questions': len(Question.query.all()),
+        'questions': current_questions
       })
 
     except:
