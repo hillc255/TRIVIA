@@ -82,7 +82,7 @@ def create_app(test_config=None):
       'total_categories': len(Category.query.all())
     })
 
-    #categories test endpoint
+    #Test categories endpoint
     #curl http://127.0.0.1:5000/categories
     #curl -X GET http://127.0.0.1:5000/categories
 
@@ -129,7 +129,7 @@ def create_app(test_config=None):
       'current_category': None
     })
 
-    #questions endpoint test
+    #Test questions endpoint
     #curl http://127.0.0.1:5000/questions
     #curl -X GET http://127.0.0.1:5000/questions
     #might not work  - curl -X GET http://127.0.0.1:5000/questions/?page/=1
@@ -164,8 +164,8 @@ def create_app(test_config=None):
     except:
       abort(422)
 
-      #delete endpoint to test
-      #curl -X DELETE http://127.0.0.1:5000/questions/26
+    #Test delete endpoint
+    #curl -X DELETE http://127.0.0.1:5000/questions/26
 
   '''
   @TODO: 
@@ -221,9 +221,7 @@ def create_app(test_config=None):
   '''
   @app.route('/questions/search', methods=['POST'])
   def search_question():
-        
-    
-        
+               
     #get searchterm
     data = request.get_json()
     if data.get('searchterm') is not None:
@@ -235,8 +233,6 @@ def create_app(test_config=None):
       try:
         result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
         
-        #current_questions = paginate_questions(request, result)
-
         #check search result with search_term
         print('This is result: %s' % result)
 
@@ -251,7 +247,7 @@ def create_app(test_config=None):
           'questions': formatted_questions,
           'total_questions': len(formatted_questions),
           'current_category': None
-        })
+        }), 200
 
       except:
         abort(422)
@@ -266,7 +262,43 @@ def create_app(test_config=None):
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
+  @app.route('/categories/<int:id>/questions')
+  def get_questions_by_category(id):
+        
+    print('This is category_id: %s' % id)
+    
+    #get the category id
+    category = Category.query.filter_by(id=id).one_or_none()
 
+    #Test category parameter is passed into function
+    print('This is category: %s' % category)
+
+    if (category is None):
+      abort(404)
+
+    #get all questions with the category
+    result = Question.query.filter_by(category=id).all()
+
+    if len(result) == 0:
+      abort(404)
+
+    #get all formatted questions
+    formatted_questions = [question.format() for question in result]
+    
+    print('This is formatted_questions: %s' % result)
+    
+    #paginate results
+    current_questions=paginate_questions(request, result)
+
+    return jsonify({
+      'success': True,
+      'questions': current_questions,
+      'total_questions': len(current_questions),
+      'current_category': id
+    }), 200
+    
+    #Test endpoints
+    #http://127.0.0.1:5000/categories/1/questions
 
   '''
   @TODO: 
