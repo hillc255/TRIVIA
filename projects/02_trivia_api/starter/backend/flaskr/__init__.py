@@ -2,6 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
+from sqlalchemy import func
 import random
 
 from models import setup_db, Question, Category
@@ -81,6 +82,10 @@ def create_app(test_config=None):
       'total_categories': len(Category.query.all())
     })
 
+    #categories test endpoint
+    #curl http://127.0.0.1:5000/categories
+    #curl -X GET http://127.0.0.1:5000/categories
+
   '''
   @TODO: 
   Create an endpoint to handle GET requests for questions, 
@@ -124,6 +129,12 @@ def create_app(test_config=None):
       'current_category': None
     })
 
+    #questions endpoint test
+    #curl http://127.0.0.1:5000/questions
+    #curl -X GET http://127.0.0.1:5000/questions
+    #might not work  - curl -X GET http://127.0.0.1:5000/questions/?page/=1
+    #http://127.0.0.1:5000/questions?page=3
+
   '''
   @TODO: 
   Create an endpoint to DELETE question using a question ID. 
@@ -153,6 +164,9 @@ def create_app(test_config=None):
     except:
       abort(422)
 
+      #delete endpoint to test
+      #curl -X DELETE http://127.0.0.1:5000/questions/26
+
   '''
   @TODO: 
   Create an endpoint to POST a new question, 
@@ -164,45 +178,36 @@ def create_app(test_config=None):
   of the questions list in the "List" tab.  
   '''
 
-  @app.route('/questions', methods=['POST'])
+  @app.route('/questions/add', methods=['POST'])
   def add_question():
         
-    new_question = request.json.get('question', None)
-    new_answer = request.json.get('answer', None)
-    new_category = request.json.get('category', None)
-    new_difficulty = request.json.get('difficulty', None)
-
-    try:
-      question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
-      questions.insert()
-
-      selection = Question.query.order_by(Question.id).all()
-      current_questions = paginate_questions(request, selection)
-
-      return jsonify({
-        'success': True,
-        'added_question': question,
-        'total_questions': len(Question.query.all()),
-        'questions': current_questions
-      })
-
-    except:
-      abort(422)
-
-      # data = {
-    #   'question': request.json.get['question'],
-    #   'answer': request.json.get['answer'],
-    #   'category': request.json.get['category'],
-    #   'difficulty': request.json.get['difficulty']
-    # }
+    data = {
+    'question': request.get_json()['question'],
+    'answer': request.get_json()['answer'],
+    'category': request.get_json()['category'],
+    'difficulty': request.get_json()['difficulty']
+    }
     
-    # question = Question(**data)
-    # question.insert()
+    question = Question(**data)
+    question.insert()
+
+    #selection = Question.query.order_by(Question.id).all()
+    #current_questions = paginate_questions(request, selection)
+
+    return jsonify({
+      'success': True
+      #'total_questions': len(Question.query.all()),
+      #'questions': current_questions
+    })
     
     # result = {
     #   'success': True,
+
     # }
     # return jsonify(result)
+
+#good url test
+# $  curl --header "Content-Type: application/json" --request POST --data '{"question":"Test question","answer":"Test answer","category":"1","difficulty":4}' http://127.0.0.1:5000/questions/add
 
   '''
   @TODO: 
@@ -214,43 +219,45 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
-  @app.route('/questions/{id}', methods=['GET','POST'])
+  @app.route('/questions/search', methods=['POST'])
   def search_question():
-    body = request.get_json()
+        
+    
+        
+    #get searchterm
+    data = request.get_json()
+    if data.get('searchterm') is not None:
+      search_term = data.get('searchterm')
+    
+      #check search parameter is passed into function
+      print('This is searchterm: %s' % search_term)
 
-    new_question = body.get('question', None)
-    new_answer = body.get('answer', None)
-    new_difficulty = body.get('difficulty', None)
-    new_category = body.get('category', None)
-    search = body.get('search', None)
+      try:
+        result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+        
+        #current_questions = paginate_questions(request, result)
 
-    try:
-      if search:
-        selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
-        current_questions = paginate_questions(request, selection)
+        #check search result with search_term
+        print('This is result: %s' % result)
+
+        formatted_questions = [question.format() for question in result]
+        print('This is formatted_questions: %s' % result)
+
+        if len(result) == 0:
+          abort(404)
 
         return jsonify({
           'success': True,
-          'questions': current_questions,
-          'total_questions': len(selection.all())
-        })
-      else:
-        questions = Question(question=new_question, answer=new_answer, difficulty=new_difficulty, category=new_category)
-        questions.insert()
-
-        selection = Question.query.order_by(Question.id).all()
-        current_questions = paginate_questions(request, selection)
-
-        return jsonify({
-          'success': True,
-          'created': questions.id,
-          'questions': current_questions,
-          'total_questions': len(Question.query.all())
+          'questions': formatted_questions,
+          'total_questions': len(formatted_questions),
+          'current_category': None
         })
 
-    except:
-      abort(422)
+      except:
+        abort(422)
 
+  #test endpoint
+  #  curl -X POST -H "Content-Type: application/json" -d '{"searchterm":"title"}' http://127.0.0.1:5000/questions/search
   '''
   @TODO: 
   Create a GET endpoint to get questions based on category. 
