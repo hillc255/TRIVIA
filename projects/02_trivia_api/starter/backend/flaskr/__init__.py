@@ -347,7 +347,7 @@ def create_app(test_config=None):
       else:
         print('else...')
         #quiz = Question.query.filter_by(category=quiz_category['id']).all()
-        quiz = Question.query.filter_by(Category=quiz_category['id']).all()
+        quiz = Question.query.filter_by(category=quiz_category['id']).all()
         print('This is quiz not equal 0: %s' % quiz)
       if not quiz:
         return abort(422)
