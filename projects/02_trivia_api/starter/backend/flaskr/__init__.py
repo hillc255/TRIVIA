@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
-from sqlalchemy import func
+#from sqlalchemy import func
 import random
 
 from models import setup_db, Question, Category
@@ -62,32 +62,45 @@ def create_app(test_config=None):
   #   return 'CORS IS WORKING'
 
   '''
-  @TODO: 
+  @TODO - ok: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
+  #revised based on 
+  #https://knowledge.udacity.com/questions/280959#284132
 
   @app.route('/categories', methods=['GET']) 
-  def retrieve_categories():
+  def get_categories():
 
-    selection = Category.query.order_by(Category.id).all()
-    current_categories = paginate_categories(request, selection)
-
-    if len(current_categories) == 0:
-      abort(404)
-
+    categories = Category.query.all()  
+    formatted_categories = {}
+    for category in categories:
+      formatted_categories[category.id] = category.type
     return jsonify({
       'success': True,
-      'categories': current_categories,
-      'total_categories': len(Category.query.all())
-    })
+      'categories': formatted_categories,
+      'total_categories': len(categories)
+    })  
+
+    #selection = Category.query.order_by(Category.id).all()
+    #current_categories = paginate_categories(request, selection)
+
+    #if len(current_categories) == 0:
+      #abort(404)
+
+    #return jsonify({
+      #'success': True,
+      #'categories': current_categories,
+      #'total_categories': len(Category.query.all())
+    #}), 200
 
     #Test categories endpoint
     #curl http://127.0.0.1:5000/categories
     #curl -X GET http://127.0.0.1:5000/categories
+    #curl -X GET http://127.0.0.1:5000/categories?page=1000
 
   '''
-  @TODO: 
+  @TODO - ok: 
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
@@ -100,7 +113,7 @@ def create_app(test_config=None):
   '''
 
   @app.route('/questions', methods=['GET'])
-  def retrieve_questions():
+  def get_questions():
   
     #query all questions, group by category, id then paginate the questions
     selection = Question.query.order_by(Question.category, Question.id).group_by(Question.category, Question.id).all()
@@ -125,9 +138,9 @@ def create_app(test_config=None):
       'success': True,
       'questions': current_questions,
       'total_questions': len(Question.query.all()),
-      'categories': formatted_categories,
-      'current_category': None
-    })
+      'current_category': None,
+      'categories': formatted_categories
+    }), 200
 
     #Test questions endpoint
     #curl http://127.0.0.1:5000/questions
@@ -136,7 +149,7 @@ def create_app(test_config=None):
     #http://127.0.0.1:5000/questions?page=3
 
   '''
-  @TODO: 
+  @TODO - ok: 
   Create an endpoint to DELETE question using a question ID. 
 
   TEST: When you click the trash icon next to a question, the question will be removed.
@@ -159,7 +172,7 @@ def create_app(test_config=None):
         'deleted': id,
         'questions': current_questions,
         'total_questions': len(Question.query.all())
-      })
+      }), 200
 
     except:
       abort(422)
@@ -168,7 +181,7 @@ def create_app(test_config=None):
     #curl -X DELETE http://127.0.0.1:5000/questions/26
 
   '''
-  @TODO: 
+  @TODO - ok: 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
@@ -198,7 +211,7 @@ def create_app(test_config=None):
       'success': True
       #'total_questions': len(Question.query.all()),
       #'questions': current_questions
-    })
+    }), 200
     
     # result = {
     #   'success': True,
@@ -206,11 +219,11 @@ def create_app(test_config=None):
     # }
     # return jsonify(result)
 
-#good url test
+#Test add new question
 # $  curl --header "Content-Type: application/json" --request POST --data '{"question":"Test question","answer":"Test answer","category":"1","difficulty":4}' http://127.0.0.1:5000/questions/add
 
   '''
-  @TODO: 
+  @TODO - ok: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -232,7 +245,7 @@ def create_app(test_config=None):
 
       try:
         result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
-        
+    
         #check search result with search_term
         print('This is result: %s' % result)
 
@@ -253,16 +266,16 @@ def create_app(test_config=None):
         abort(422)
 
   #test endpoint
-  #  curl -X POST -H "Content-Type: application/json" -d '{"searchterm":"title"}' http://127.0.0.1:5000/questions/search
+  # curl -X POST -H "Content-Type: application/json" -d '{"searchterm":"title"}' http://127.0.0.1:5000/questions/search
   '''
-  @TODO: 
+  @TODO - ok: 
   Create a GET endpoint to get questions based on category. 
 
   TEST: In the "List" tab / main screen, clicking on one of the 
   categories in the left column will cause only questions of that 
   category to be shown. 
   '''
-  @app.route('/categories/<int:id>/questions')
+  @app.route('/categories/<int:id>/questions', methods=['GET'])
   def get_questions_by_category(id):
         
     print('This is category_id: %s' % id)
@@ -298,7 +311,9 @@ def create_app(test_config=None):
     }), 200
     
     #Test endpoints
+    #curl -X GET http://127.0.0.1:5000/categories/1/questions
     #http://127.0.0.1:5000/categories/1/questions
+    #curl --header "Content-Type: application/json" --request GET http://127.0.0.1:5000/categories/2/questions
 
   '''
   @TODO: 
@@ -311,9 +326,59 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
+  #snippet found here:  https://knowledge.udacity.com/questions/234306
+  @app.route('/quizzes', methods=['POST'])
+  def play_quiz():
+    
+    #data from previous question by category
+    data = request.get_json()
+    previous_questions = data.get('previous_questions', [])
+    print('This is previous_questions: %s' % previous_questions)
+
+    quiz_category = data.get('quiz_category', None)
+    print('This is quiz_category: %s' % quiz_category)
+    
+    #get a list of questions from selected category
+    try:
+      if quiz_category:
+        print('If quiz_category %s' % quiz_category)       
+        quiz = Question.query.all()
+        print('This is quiz equals 0: %s' % quiz)
+      else:
+        print('else...')
+        #quiz = Question.query.filter_by(category=quiz_category['id']).all()
+        quiz = Question.query.filter_by(Category=quiz_category['id']).all()
+        print('This is quiz not equal 0: %s' % quiz)
+      if not quiz:
+        return abort(422)
+      selected = []
+       
+        #get a random question which has not been requested before
+      for question in quiz:
+        if question.id not in previous_questions:
+          selected.append(question.format())
+        if len(selected) != 0:
+          result = random.choice(selected)
+
+          return jsonify({
+            'success': True,
+            'question': result
+          })
+        else:
+          return jsonify({
+            'success': False,
+            'question': result
+          })
+    except:
+      abort(422)
+    
+    #Test endpoints
+    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19,25,27], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
+    #http://127.0.0.1:5000/quizzes
+    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": 2, "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
 
   '''
-  @TODO: 
+  @TODO - ok: 
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
@@ -322,7 +387,7 @@ def create_app(test_config=None):
     return jsonify({
       "success": False,
       "error": 404,
-      "message": "resource not found"
+      "message": "Resource Not found"
       }), 404
 
   @app.errorhandler(422)
@@ -330,7 +395,7 @@ def create_app(test_config=None):
     return jsonify({
       "success": False,
       "error": 422,
-      "message": "unprocessable"
+      "message": "Unprocessable"
       }), 422
 
   @app.errorhandler(400)
@@ -338,10 +403,17 @@ def create_app(test_config=None):
     return jsonify({
       "success": False,
       "error": 400,
-      "message": "bad request"
+      "message": "Bad Request"
       }), 400
 
-  
+  @app.errorhandler(405)
+  def not_allowed(error):
+    return jsonify({
+      "success": False,
+      "error": 405,
+      "message": "Method Not Allowed"
+      }), 405     
+
   return app
 
     
