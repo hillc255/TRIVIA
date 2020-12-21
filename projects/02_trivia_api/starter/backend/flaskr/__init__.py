@@ -343,22 +343,27 @@ def create_app(test_config=None):
       if quiz_category:
         print('If quiz_category %s' % quiz_category)       
         quiz = Question.query.all()
-        print('This is quiz equals 0: %s' % quiz)
+        print('This is quiz: %s' % quiz)
       else:
         print('else...')
-        #quiz = Question.query.filter_by(category=quiz_category['id']).all()
         quiz = Question.query.filter_by(category=quiz_category['id']).all()
         print('This is quiz not equal 0: %s' % quiz)
       if not quiz:
         return abort(422)
-      selected = []
+
+      selected = [] #list for random
        
-        #get a random question which has not been requested before
+      #get a random question which has not been requested before
       for question in quiz:
         if question.id not in previous_questions:
+          print('This is question.id: %s' % question.id)
           selected.append(question.format())
+          print('Selected.append %s' % selected.append(question.format()))
+
         if len(selected) != 0:
-          result = random.choice(selected)
+          print('Length of selected !=0 %s' % len(selected))
+          result = random.choice(selected) #random not working?
+          print('Random question %s' % result)
 
           return jsonify({
             'success': True,
