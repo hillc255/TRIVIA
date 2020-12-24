@@ -327,6 +327,7 @@ def create_app(test_config=None):
   and shown whether they were correct or not. 
   '''
   #snippet found here:  https://knowledge.udacity.com/questions/234306
+  
   @app.route('/quizzes', methods=['POST'])
   def play_quiz():
     
@@ -335,48 +336,55 @@ def create_app(test_config=None):
     previous_questions = data.get('previous_questions', [])
     print('This is previous_questions: %s' % previous_questions)
 
-    quiz_category = data.get('quiz_category', None)
+    #quiz_category = data.get('quiz_category', None)
+    quiz_category = data.get('quiz_category')
     print('This is quiz_category: %s' % quiz_category)
-    
-    #get a list of questions from selected category
-    try:
-      if quiz_category:
-        print('If quiz_category %s' % quiz_category)
-        #quiz = Question.query.filter_by(category=quiz_category['id']).all() #not working
-        quiz = Question.query.filter_by(category=quiz_category).all()
-        print('This is quiz not equal 0: %s' % quiz)       
-      else:
-        print('else...')
-        quiz = Question.query.all()
-        print('This is quiz: %s' % quiz)
-      if not quiz:
-        return abort(422)
 
-      selected = [] #list for random
-       
-      #get a random question which has not been requested before
-      for question in quiz:
-        if question.id not in previous_questions:
-          print('This is question.id: %s' % question.id)
-          selected.append(question.format())
-          print('Selected.append %s' % selected.append(question.format()))
-
-      if len(selected) != 0:
-        print('Length of selected !=0 %s' % len(selected))
-        result = random.choice(selected)
-        print('Random question %s' % result)
-
-        return jsonify({
-          'success': True,
-          'question': result
-        })
-      else:
-        return jsonify({
-          'success': False,
-          'question': result
-        })
-    except:
+    if not quiz_category:
       abort(422)
+
+    question = Question.query.filter(Question.category == quiz_category.get('id')).filter(
+      Question.id.notin_(previous_questions_list)).order_by(func.random()).limit(1).all()
+    
+    # #get a list of questions from selected category
+    # try:
+    #   if quiz_category:
+    #     print('If quiz_category %s' % quiz_category)
+    #     #quiz = Question.query.filter_by(category=quiz_category['id']).all() #not working
+    #     quiz = Question.query.filter_by(category=quiz_category).all()
+    #     print('This is quiz not equal 0: %s' % quiz)       
+    #   else:
+    #     print('else...')
+    #     quiz = Question.query.all()
+    #     print('This is quiz: %s' % quiz)
+    #   if not quiz:
+    #     return abort(422)
+
+    #   selected = [] #list for random
+       
+    #   #get a random question which has not been requested before
+    #   for question in quiz:
+    #     if question.id not in previous_questions:
+    #       print('This is question.id: %s' % question.id)
+    #       selected.append(question.format())
+    #       print('Selected.append %s' % selected.append(question.format()))
+
+    #   if len(selected) != 0:
+    #     print('Length of selected !=0 %s' % len(selected))
+    #     result = random.choice(selected)
+    #     print('Random question %s' % result)
+
+    #     return jsonify({
+    #       'success': True,
+    #       'question': result
+    #     })
+    #   else:
+    #     return jsonify({
+    #       'success': False,
+    #       'question': result
+    #     })
+    # except:
+    #   abort(422)
     
     #Test endpoints
     #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19,25,27], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
