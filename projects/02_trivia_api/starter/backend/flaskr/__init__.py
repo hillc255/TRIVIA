@@ -3,7 +3,6 @@ from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 from sqlalchemy import func
-#from sqlalchemy.sql import func
 import random
 
 from models import setup_db, Question, Category
@@ -343,10 +342,25 @@ def create_app(test_config=None):
     if not quiz_category:
       abort(422)
 
-    question = Question.query.filter(Question.category == quiz_category.get('id')).filter(
-      Question.id.notin_(previous_questions_list)).order_by(func.random()).limit(1).all()
+    result = Question.query.filter(Question.category == quiz_category).filter(
+      Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
     
-    # #get a list of questions from selected category
+    print('This is random question object: %s' % result)
+
+    #get all formatted question
+    formatted_question = [question.format() for question in result]
+
+    if result:       
+      return jsonify({
+        'success': True,
+        'question': formatted_question
+      })
+    else:
+      return jsonify({
+        'success': False
+      })
+    
+    #get a list of questions from selected category
     # try:
     #   if quiz_category:
     #     print('If quiz_category %s' % quiz_category)
