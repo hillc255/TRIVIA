@@ -2,7 +2,8 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
-#from sqlalchemy import func
+from sqlalchemy import func
+#from sqlalchemy.sql import func
 import random
 
 from models import setup_db, Question, Category
@@ -311,9 +312,8 @@ def create_app(test_config=None):
     }), 200
     
     #Test endpoints
-    #curl -X GET http://127.0.0.1:5000/categories/1/questions
-    #http://127.0.0.1:5000/categories/1/questions
-    #curl --header "Content-Type: application/json" --request GET http://127.0.0.1:5000/categories/2/questions
+    #curl -X GET http://127.0.0.1:5000/categories/2/questions
+    #http://127.0.0.1:5000/categories/2/questions
 
   '''
   @TODO: 
@@ -341,13 +341,14 @@ def create_app(test_config=None):
     #get a list of questions from selected category
     try:
       if quiz_category:
-        print('If quiz_category %s' % quiz_category)       
-        quiz = Question.query.all()
-        print('This is quiz: %s' % quiz)
+        print('If quiz_category %s' % quiz_category)
+        #quiz = Question.query.filter_by(category=quiz_category['id']).all() #not working
+        quiz = Question.query.filter_by(category=quiz_category).all()
+        print('This is quiz not equal 0: %s' % quiz)       
       else:
         print('else...')
-        quiz = Question.query.filter_by(category=quiz_category['id']).all()
-        print('This is quiz not equal 0: %s' % quiz)
+        quiz = Question.query.all()
+        print('This is quiz: %s' % quiz)
       if not quiz:
         return abort(422)
 
@@ -360,28 +361,27 @@ def create_app(test_config=None):
           selected.append(question.format())
           print('Selected.append %s' % selected.append(question.format()))
 
-        if len(selected) != 0:
-          print('Length of selected !=0 %s' % len(selected))
-          result = random.choice(selected) #random not working?
-          print('Random question %s' % result)
+      if len(selected) != 0:
+        print('Length of selected !=0 %s' % len(selected))
+        result = random.choice(selected)
+        print('Random question %s' % result)
 
-          return jsonify({
-            'success': True,
-            'question': result
-          })
-        else:
-          return jsonify({
-            'success': False,
-            'question': result
-          })
+        return jsonify({
+          'success': True,
+          'question': result
+        })
+      else:
+        return jsonify({
+          'success': False,
+          'question': result
+        })
     except:
       abort(422)
     
     #Test endpoints
     #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19,25,27], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
     #http://127.0.0.1:5000/quizzes
-    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": 2, "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
-
+  
   '''
   @TODO - ok: 
   Create error handlers for all expected errors 
