@@ -195,10 +195,8 @@ def create_app(test_config=None):
       'difficulty': request.get_json()['difficulty']
       }
 
-      #if not data.question:
-        #abort(422)
-      #if not data.answer:
-        #abort(422)
+      if not ('question' in data and 'answer' in data and 'category' in data and 'difficulty' in data):
+        abort(422)
 
       if data:  
         question = Question(**data)
@@ -217,7 +215,7 @@ def create_app(test_config=None):
 # curl --header "Content-Type: application/json" --request POST --data '{"question":"Test question6","answer":"Test answer6","category":"6","difficulty":6}' http://localhost:3000/questions/add
  
   '''
-  @TODO - ok: 
+  @TODO - ui ok: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -226,16 +224,16 @@ def create_app(test_config=None):
   only question that include that string within their question. 
   Try using the word "title" to start. 
   '''
-  @app.route('/questions/search', methods=['POST'])
+  @app.route('/search', methods=['POST'])
   def search_question():
                
     #get searchterm
     data = request.get_json()
-    if data.get('searchterm') is not None:
-      search_term = data.get('searchterm')
+    if data.get('searchTerm') is not None:
+      search_term = data.get('searchTerm')
     
       #check search parameter is passed into function
-      print('This is searchterm: %s' % search_term)
+      print('This is search_term: %s' % search_term)
 
       try:
         result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
@@ -260,7 +258,9 @@ def create_app(test_config=None):
         abort(422)
 
   #test endpoint
-  # curl -X POST -H "Content-Type: application/json" -d '{"searchterm":"title"}' http://127.0.0.1:5000/questions/search
+  # curl -X POST -H "Content-Type: application/json" -d '{"searchTerm":"title"}' http://127.0.0.1:5000/search
+  # curl -X POST -H "Content-Type: application/json" -d '{"searchTerm":"organ"}' http://localhost:3000/search
+ 
   '''
   @TODO - ok: 
   Create a GET endpoint to get questions based on category. 
