@@ -37,7 +37,8 @@ def create_app(test_config=None):
   setup_db(app)
   
   '''
-  @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
+  @TODO: Done
+  Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
   '''
   CORS(app)
   cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -50,7 +51,8 @@ def create_app(test_config=None):
   #   })
 
   '''
-  @TODO: Use the after_request decorator to set Access-Control-Allow
+  @TODO: Done
+  Use the after_request decorator to set Access-Control-Allow
   '''
 
   @app.after_request
@@ -67,7 +69,7 @@ def create_app(test_config=None):
   #   return 'CORS IS WORKING'
 
   '''
-  @TODO - ui ok: 
+  @TODO - Done: 
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
@@ -93,7 +95,7 @@ def create_app(test_config=None):
     #curl -X GET http://127.0.0.1:5000/categories?page=1000
 
   '''
-  @TODO - ui ok: 
+  @TODO - Done: 
   Create an endpoint to handle GET requests for questions, 
   including pagination (every 10 questions). 
   This endpoint should return a list of questions, 
@@ -142,7 +144,7 @@ def create_app(test_config=None):
     #http://127.0.0.1:5000/questions?page=3
 
   '''
-  @TODO - ui ok: 
+  @TODO - Done: 
   Create an endpoint to DELETE question using a question ID. 
 
   TEST: When you click the trash icon next to a question, the question will be removed.
@@ -174,7 +176,7 @@ def create_app(test_config=None):
     #curl -X DELETE http://127.0.0.1:5000/questions/26
 
   '''
-  @TODO - ok: 
+  @TODO - Done - add without question and answer - check: 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.
@@ -215,7 +217,7 @@ def create_app(test_config=None):
 # curl --header "Content-Type: application/json" --request POST --data '{"question":"Test question6","answer":"Test answer6","category":"6","difficulty":6}' http://localhost:3000/questions/add
  
   '''
-  @TODO - ui ok: 
+  @TODO - Done: 
   Create a POST endpoint to get questions based on a search term. 
   It should return any questions for whom the search term 
   is a substring of the question. 
@@ -262,7 +264,7 @@ def create_app(test_config=None):
   # curl -X POST -H "Content-Type: application/json" -d '{"searchTerm":"organ"}' http://localhost:3000/search
  
   '''
-  @TODO - ok: 
+  @TODO - Done: 
   Create a GET endpoint to get questions based on category. 
 
   TEST: In the "List" tab / main screen, clicking on one of the 
@@ -309,7 +311,7 @@ def create_app(test_config=None):
     #http://127.0.0.1:5000/categories/2/questions
 
   '''
-  @TODO: 
+  @TODO - Not working: 
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
@@ -377,7 +379,7 @@ def create_app(test_config=None):
     #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16],"quizCategory": "2"}' http://127.0.0.1:5000/play
 
   '''
-  @TODO - ok: 
+  @TODO - Done
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
