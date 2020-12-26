@@ -369,51 +369,12 @@ def create_app(test_config=None):
 
     except:
       abort(422)
-    
-    #if not quiz_category:
-      #abort(422)
 
-      # selected = []
-
-      # for question in result:
-      #   if question.id not in previous_questions:
-      #     selected.append(question.format())
-
-      # if len(result) != 0:
-            
-      #   return jsonify({
-      #     "success": True, 
-      #     "question": result
-      #     })
-      # else:
-      #   return jsonify({
-      #     "question": False
-      #     })
-
-
-
-    #current_question = paginate_questions(request, result)
-    #print('This is current question: %s' % current_question)
-
-    #question = list(map(lambda x : x['question'], current_question))
-    #print(f'Print Question --> {question}')
-
-    # if result:       
-    #   return jsonify({
-    #     'success': True,
-    #     'previousQuestions': previous_questions,
-    #     'currentQuestion': question
-    #   })
-    # else:
-    #   return jsonify({
-    #     'success': False
-    #   })
-  
     #Test random question endpoints
-    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
-    #http://127.0.0.1:5000/play
-    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19], "quiz_category": "2"}' http://localhost:3000/quizzes
-    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestion": [16],"quizCategory": "2"}' http://127.0.0.1:5000/play
+    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16,18], "quizCategory": "0"}' http://localhost:3000/play
+    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16,18,19], "quiz_category": ""}' http://127.0.0.1:5000/play
+    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [17,18,19], "quiz_category": "2"}' http://localhost:3000/play
+    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16],"quizCategory": "2"}' http://127.0.0.1:5000/play
 
   '''
   @TODO - ok: 
