@@ -321,44 +321,48 @@ def create_app(test_config=None):
   '''
   #snippet found here:  https://knowledge.udacity.com/questions/234306
   
-  @app.route('/quizzes', methods=['POST'])
+  @app.route('/play', methods=['POST'])
   def play_quiz():
     
     #data from previous question by category
     data = request.get_json()
-    previous_questions = data.get('previous_questions', [])
+    previous_questions = data.get('previousQuestions', [])
     print('This is previous_questions: %s' % previous_questions)
 
-    #quiz_category = data.get('quiz_category', None)
-    quiz_category = data.get('quiz_category')
+    quiz_category = data.get('quizCategory')
     print('This is quiz_category: %s' % quiz_category)
 
     if not quiz_category:
       abort(422)
 
-    result = Question.query.filter(Question.category == quiz_category).filter(
-      Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
+    result = Question.query.filter(Question.category == quiz_category).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
     
+    #check the returned result
     print('This is random question object: %s' % result)
 
-    #get all formatted question
-    formatted_question = [question.format() for question in result]
+    current_question = paginate_questions(request, result)
+    print('This is current question: %s' % current_question)
+
+    question = list(map(lambda x : x['question'], current_question))
+    print(f'Print Question --> {question}')
 
     if result:       
       return jsonify({
         'success': True,
-        'question': formatted_question
+        'previousQuestions': previous_questions,
+        'currentQuestion': question
       })
     else:
       return jsonify({
         'success': False
       })
   
-    
     #Test random question endpoints
-    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19,25,27], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
-    #http://127.0.0.1:5000/quizzes
-  
+    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
+    #http://127.0.0.1:5000/play
+    #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19], "quiz_category": "2"}' http://localhost:3000/quizzes
+    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestion": [16],"quizCategory": "2"}' http://127.0.0.1:5000/play
+
   '''
   @TODO - ok: 
   Create error handlers for all expected errors 
