@@ -133,7 +133,7 @@ def create_app(test_config=None):
       'total_questions': len(Question.query.all()),
       'current_category': None,
       'categories': formatted_categories
-    }), 200
+    })
 
     #Test questions endpoint
     #curl http://127.0.0.1:5000/questions
@@ -165,7 +165,7 @@ def create_app(test_config=None):
         'deleted': id,
         'questions': current_questions,
         'total_questions': len(Question.query.all())
-      }), 200
+      })
 
     except:
       abort(422)
@@ -204,7 +204,7 @@ def create_app(test_config=None):
 
         return jsonify({
           'success': True 
-        }), 200
+        })
 
     except:
       abort(422)
@@ -326,36 +326,88 @@ def create_app(test_config=None):
     
     #data from previous question by category
     data = request.get_json()
+    #previous_questions = data.get('previousQuestions')
     previous_questions = data.get('previousQuestions', [])
     print('This is previous_questions: %s' % previous_questions)
-
+    
     quiz_category = data.get('quizCategory')
     print('This is quiz_category: %s' % quiz_category)
 
-    if not quiz_category:
+    try:
+      
+      if quiz_category == "0" or quiz_category == "" or quiz_category == " ":
+        #if not quiz_category:
+        result = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
+        #check the returned result
+        print('This is random question object1: %s' % result) 
+
+      else:
+        result = Question.query.filter(Question.category == quiz_category).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
+        #check the returned result
+        print('This is random question id object2: %s' % result) 
+
+      #add question to list previous questions    
+      for question in result:
+        if question.id not in previous_questions:
+          print('question.id: %s' % question.id)
+          #selected.append(question.format())
+          previous_questions.append(question.id)
+
+          print('This is list of all previous questions: %s' % previous_questions)
+          print('This is the question: %s' % question.question)
+
+      if result:       
+        return jsonify({
+          'success': True,
+          'previousQuestions': previous_questions,
+          'currentQuestion': question.question
+        })
+      else:
+        return jsonify({
+        "question": False
+        })
+
+    except:
       abort(422)
-
-    result = Question.query.filter(Question.category == quiz_category).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
     
-    #check the returned result
-    print('This is random question object: %s' % result)
+    #if not quiz_category:
+      #abort(422)
 
-    current_question = paginate_questions(request, result)
-    print('This is current question: %s' % current_question)
+      # selected = []
 
-    question = list(map(lambda x : x['question'], current_question))
-    print(f'Print Question --> {question}')
+      # for question in result:
+      #   if question.id not in previous_questions:
+      #     selected.append(question.format())
 
-    if result:       
-      return jsonify({
-        'success': True,
-        'previousQuestions': previous_questions,
-        'currentQuestion': question
-      })
-    else:
-      return jsonify({
-        'success': False
-      })
+      # if len(result) != 0:
+            
+      #   return jsonify({
+      #     "success": True, 
+      #     "question": result
+      #     })
+      # else:
+      #   return jsonify({
+      #     "question": False
+      #     })
+
+
+
+    #current_question = paginate_questions(request, result)
+    #print('This is current question: %s' % current_question)
+
+    #question = list(map(lambda x : x['question'], current_question))
+    #print(f'Print Question --> {question}')
+
+    # if result:       
+    #   return jsonify({
+    #     'success': True,
+    #     'previousQuestions': previous_questions,
+    #     'currentQuestion': question
+    #   })
+    # else:
+    #   return jsonify({
+    #     'success': False
+    #   })
   
     #Test random question endpoints
     #curl --header "Content-Type: application/json" --request POST --data '{"previous_question": [16,17,18,19], "quiz_category": "2"}' http://127.0.0.1:5000/quizzes
