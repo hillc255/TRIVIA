@@ -83,6 +83,7 @@ def create_app(test_config=None):
     formatted_categories = {}
     for category in categories:
       formatted_categories[category.id] = category.type
+
     return jsonify({
       'success': True,
       'categories': formatted_categories,
@@ -321,7 +322,6 @@ def create_app(test_config=None):
   one question at a time is displayed, the user is allowed to answer
   and shown whether they were correct or not. 
   '''
-  #snippet found here:  https://knowledge.udacity.com/questions/234306
   
   @app.route('/play', methods=['POST'])
   def play_quiz():
@@ -336,38 +336,42 @@ def create_app(test_config=None):
     print('This is quiz_category: %s' % quiz_category)
 
     try:
+      #quiz_category is not specified
+      if quiz_category["id"] == "0" or quiz_category["id"] == "" or quiz_category["id"] == " ":
+        selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
+        #check the returned result
+        print('This is random question object1: %s' % selected) 
+        #no more questions end
+        if not selected:
+          return abort(422)
+
+      #quiz_category is specified   
+      else:
+        selected = Question.query.filter(Question.category == quiz_category["id"]).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
+        #check the returned result
+        print('This is random question id object2: %s' % selected) 
       
-      if quiz_category == "0" or quiz_category == "" or quiz_category == " ":
-        #if not quiz_category:
-        result = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-        #check the returned result
-        print('This is random question object1: %s' % result) 
+        #if no questions for specified quiz_category
+        if not selected:
+          #get questions from any other quiz_category which is not in previous question
+          selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
+          
+          #if no more questions end
+          if not selected:
+            return abort(422)
+     
+      #get question in result and display it
+      for result in selected:       
 
-      else:
-        result = Question.query.filter(Question.category == quiz_category).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-        #check the returned result
-        print('This is random question id object2: %s' % result) 
-
-      #add question to list previous questions    
-      for question in result:
-        if question.id not in previous_questions:
-          print('question.id: %s' % question.id)
-          #selected.append(question.format())
-          previous_questions.append(question.id)
-
-          print('This is list of all previous questions: %s' % previous_questions)
-          print('This is the question: %s' % question.question)
-
-      if result:       
-        return jsonify({
-          'success': True,
-          'previousQuestions': previous_questions,
-          'currentQuestion': question.question
-        })
-      else:
-        return jsonify({
-        "question": False
-        })
+        if result:       
+          return jsonify({
+            'success': True,
+            'currentQuestion': result.question
+          })
+        else:
+          return jsonify({
+          "question": False
+          })
 
     except:
       abort(422)
