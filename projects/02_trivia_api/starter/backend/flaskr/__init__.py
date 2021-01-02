@@ -338,43 +338,38 @@ def create_app(test_config=None):
     print('This is quiz_category: %s' % quiz_category)
 
     try:
-      #specific quiz_category selected  
+      #specific quiz_category is not selected  
       print('Quiz category None Before')
       if (quiz_category["type"]) == "click":
-
+        print('Quiz category None After')
         selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()       
         print('Selected result:  %s' % selected)
 
       else:
-        #quiz_category is not specified
+        #quiz_category is specified
         print('There is a quiz_category')
         selected = Question.query.filter(Question.category == quiz_category["id"]).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-    
         print('Selected result:  %s' % selected)
-
-      #format selected questions
-      #print('Format question object')
      
-      #no questions are returned so exit
-      if len(selected) < 1:
-        abort(404)
+      #if questions are returned successful
+      if len(selected) != 0:
+        print('Value is selected: %s' % selected)
 
-      print('Value is selected')
-
-      result = [question.format() for question in selected]
-    
-
-      #print only question from object
-      #selected_question = questions.get("question")
-      print('Selected object: %s' % result)
-
-      #selected_question = selected_object.question
-      #print('Selected question: %s' % selected_question)
+        result = [question.format() for question in selected]
+        print('Selected object: %s' % result)
       
-      return jsonify({
-        'success': True,
-        'currentQuestion': result
-      })
+        return jsonify({
+          'success': True,
+          'showAnswer': False,
+          'previousQuestions': previousQuestions,
+          'currentQuestion': result,
+          'guess': ''
+        })
+      else:
+        return jsonify({
+          'success': False
+        })
+
     except:
       abort(422)
 
