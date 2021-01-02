@@ -81,8 +81,10 @@ def create_app(test_config=None):
 
     categories = Category.query.all()  
     formatted_categories = {}
+
     for category in categories:
       formatted_categories[category.id] = category.type
+    print('formatted_categories %s' % formatted_categories)
 
     return jsonify({
       'success': True,
@@ -305,7 +307,7 @@ def create_app(test_config=None):
       'questions': current_questions,
       'total_questions': len(current_questions),
       'current_category': id
-    }), 200
+    })
     
     #Test selected cateories endpoints
     #curl -X GET http://127.0.0.1:5000/categories/2/questions
@@ -328,51 +330,51 @@ def create_app(test_config=None):
     
     #data from previous question by category
     data = request.get_json()
-    #previous_questions = data.get('previousQuestions')
-    previous_questions = data.get('previousQuestions', [])
+
+    previous_questions = data.get('previous_questions', [])
     print('This is previous_questions: %s' % previous_questions)
     
-    quiz_category = data.get('quizCategory')
+    quiz_category = data.get('quiz_category')
     print('This is quiz_category: %s' % quiz_category)
 
     try:
-      #quiz_category is not specified
-      if quiz_category["id"] == "0" or quiz_category["id"] == "" or quiz_category["id"] == " ":
-        selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-        #check the returned result
-        print('This is random question object1: %s' % selected) 
-        #no more questions end
-        if not selected:
-          return abort(422)
+      #specific quiz_category selected  
+      print('Quiz category None Before')
+      if (quiz_category["type"]) == "click":
 
-      #quiz_category is specified   
+        selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()       
+        print('Selected result:  %s' % selected)
+
       else:
+        #quiz_category is not specified
+        print('There is a quiz_category')
         selected = Question.query.filter(Question.category == quiz_category["id"]).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-        #check the returned result
-        print('This is random question id object2: %s' % selected) 
-      
-        #if no questions for specified quiz_category
-        if not selected:
-          #get questions from any other quiz_category which is not in previous question
-          selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-          
-          #if no more questions end
-          if not selected:
-            return abort(422)
+    
+        print('Selected result:  %s' % selected)
+
+      #format selected questions
+      #print('Format question object')
      
-      #get question in result and display it
-      for result in selected:       
+      #no questions are returned so exit
+      if len(selected) < 1:
+        abort(404)
 
-        if result:       
-          return jsonify({
-            'success': True,
-            'currentQuestion': result.question
-          })
-        else:
-          return jsonify({
-          "question": False
-          })
+      print('Value is selected')
 
+      result = [question.format() for question in selected]
+    
+
+      #print only question from object
+      #selected_question = questions.get("question")
+      print('Selected object: %s' % result)
+
+      #selected_question = selected_object.question
+      #print('Selected question: %s' % selected_question)
+      
+      return jsonify({
+        'success': True,
+        'currentQuestion': result
+      })
     except:
       abort(422)
 
