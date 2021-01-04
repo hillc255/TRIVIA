@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS, cross_origin
 from sqlalchemy import func
 import random
+import re
 
 from models import setup_db, Question, Category
 
@@ -314,7 +315,7 @@ def create_app(test_config=None):
     #http://127.0.0.1:5000/categories/2/questions
 
   '''
-  @TODO - Not working: 
+  @TODO  
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
@@ -331,7 +332,7 @@ def create_app(test_config=None):
     #data from previous question by category
     data = request.get_json()
 
-    previous_questions = data.get('previous_questions', [])
+    previous_questions = data.get('previous_questions', None)
     print('This is previous_questions: %s' % previous_questions)
     
     quiz_category = data.get('quiz_category')
@@ -351,25 +352,27 @@ def create_app(test_config=None):
         selected = Question.query.filter(Question.category == quiz_category["id"]).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
         print('Selected result:  %s' % selected)
      
-      #if questions are returned successful
+      #if a question is returned - format it
       if len(selected) != 0:
         print('Value is selected: %s' % selected)
 
-        result = [question.format() for question in selected]
-        print('Selected object: %s' % result)
-      
-        return jsonify({
-          'success': True,
-          'showAnswer': False,
-          'previousQuestions': previousQuestions,
-          'currentQuestion': result,
-          'guess': ''
-        })
-      else:
-        return jsonify({
-          'success': False
-        })
+        selected_question = [question.format() for question in selected]
+        print('Selected object: %s' % selected_question)
 
+        #remove brackets from question
+        question = selected_question[0]
+        print('Remove [ %s' % question)
+
+        result = {
+          'success': True,
+          'question': question
+        }
+      else:
+        result = {
+          'success': True
+        }
+      return jsonify(result)
+            
     except:
       abort(422)
 
