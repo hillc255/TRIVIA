@@ -45,11 +45,11 @@ def create_app(test_config=None):
   cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
   # Test home page is working
-  # @app.route('/')
-  # def hello():
-  #   return jsonify({
-  #     'success': True
-  #   })
+  @app.route('/')
+  def hello():
+    return jsonify({
+      'success': True
+    }), 200
 
   '''
   @TODO: Done
@@ -91,7 +91,7 @@ def create_app(test_config=None):
       'success': True,
       'categories': formatted_categories,
       'total_categories': len(categories)
-    })  
+    }), 200  
 
     #Test categories endpoint
     #curl http://127.0.0.1:5000/categories
@@ -128,9 +128,6 @@ def create_app(test_config=None):
     formatted_categories = {
       category.id: category.type for category in categories
     }
-
-    if len(current_questions) == 0:
-      abort(404)
 
     #return list of questions ordered by categories and id
     return jsonify({
