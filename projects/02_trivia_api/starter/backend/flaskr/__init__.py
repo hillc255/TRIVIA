@@ -234,22 +234,14 @@ def create_app(test_config=None):
     data = request.get_json()
     if data.get('searchTerm') is not None:
       search_term = data.get('searchTerm')
-    
-      #check search parameter is passed into function
-      print('This is search_term: %s' % search_term)
 
       try:
         result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
 
         if len(result) == 0:
-          print('before abort')
           abort(404)
-    
-        #check search result with search_term
-        print('This is result: %s' % result)
 
         formatted_questions = [question.format() for question in result]
-        print('This is formatted_questions: %s' % result)
 
         return jsonify({
           'success': True,
@@ -275,14 +267,9 @@ def create_app(test_config=None):
   '''
   @app.route('/categories/<int:id>/questions', methods=['GET'])
   def get_questions_by_category(id):
-        
-    print('This is category_id: %s' % id)
     
     #get the category id
     category = Category.query.filter_by(id=id).one_or_none()
-
-    #Test category parameter is passed into function
-    print('This is category: %s' % category)
 
     if (category is None):
       abort(404)
@@ -295,8 +282,6 @@ def create_app(test_config=None):
 
     #get all formatted questions
     formatted_questions = [question.format() for question in result]
-    
-    print('This is formatted_questions: %s' % result)
     
     #paginate results
     current_questions=paginate_questions(request, result)
@@ -313,7 +298,7 @@ def create_app(test_config=None):
     #http://127.0.0.1:5000/categories/2/questions
 
   '''
-  @TODO  
+  @TODO - Done:
   Create a POST endpoint to get questions to play the quiz. 
   This endpoint should take category and previous question parameters 
   and return a random questions within the given category, 
