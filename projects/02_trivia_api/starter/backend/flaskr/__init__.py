@@ -168,7 +168,7 @@ def create_app(test_config=None):
         'deleted': id,
         'questions': current_questions,
         'total_questions': len(Question.query.all())
-      })
+      }), 200
 
     except:
       abort(422)
@@ -207,7 +207,7 @@ def create_app(test_config=None):
 
         return jsonify({
           'success': True 
-        })
+        }), 200
 
     except:
       abort(422)
@@ -240,6 +240,10 @@ def create_app(test_config=None):
 
       try:
         result = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
+
+        if len(result) == 0:
+          print('before abort')
+          abort(404)
     
         #check search result with search_term
         print('This is result: %s' % result)
@@ -247,15 +251,12 @@ def create_app(test_config=None):
         formatted_questions = [question.format() for question in result]
         print('This is formatted_questions: %s' % result)
 
-        if len(result) == 0:
-          abort(404)
-
         return jsonify({
           'success': True,
           'questions': formatted_questions,
           'total_questions': len(formatted_questions),
           'current_category': None
-        })
+        }), 200
 
       except:
         abort(422)
@@ -305,7 +306,7 @@ def create_app(test_config=None):
       'questions': current_questions,
       'total_questions': len(current_questions),
       'current_category': id
-    })
+    }), 200
     
     #Test selected cateories endpoints
     #curl -X GET http://127.0.0.1:5000/categories/2/questions

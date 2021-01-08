@@ -1,5 +1,5 @@
 import os
-import unittest
+import unittest 
 import json
 from flask_sqlalchemy import SQLAlchemy
 
@@ -110,47 +110,100 @@ class TriviaTestCase(unittest.TestCase):
 ################################################################
 #test '/questions/add' POST
 
-    #success
+    # success
     def test_add_question(self):
-      
-      self.new_question = {'New Question','New Answer','2', '1'}
+          
+      data = {
+        'question':'New Question',
+        'answer':'New Answer',
+        'category':'2',
+        'difficulty':'1'
+      }
+          
+      res = self.client().post('/questions/add', 
+      data=json.dumps(data),
+      content_type='application/json')
 
-      res = self.client().post('/questions/add', json=self.new_question)
-    
-    #   new_question = {
-    #     'question':'New Question',
-    #     'answer':'New Answer',
-    #     'category':'2',
-    #     'difficulty': '1'
-    #   }
-
-     # data = {'New Question','New Answer','2', '1'}
-
-      data = json.loads(res.data)
+      self.data = json.loads(res.data)
       self.assertEqual(res.status_code, 200)
-      self.assertEqual(data['success'], True)
+      json_res = json.loads(res.get_data(as_text=True))
 
-    # #error
-    # def test_404_invalid_question_payload(self):
-    #   res = self.client().get('/questions/add')
+    # error
+    def test_404_invalid_category_payload(self):
+              
+      data = {
+        'question':'New Question',
+        'answer':'New Answer',
+        'category':'10',
+        'difficulty':'1'
+      }
+          
+      res = self.client().post('/questions/add', 
+      data=json.dumps(data),
+      content_type='application/json')
 
-    #   data = {
-    #   'question': '',
-    #   'answer': 'New Answer',
-    #   'category': '1',
-    #   'difficulty': '1'
-    #   }
+      self.data = json.loads(res.data)
+      self.assertEqual(res.status_code, 422)
+      json_res = json.loads(res.get_data(as_text=False))
+
+################################################################
+# test '/search' POST
+
+    # success
+    def test_search_question(self):
+          
+      data = {
+        'searchTerm':'title',
+      }
+
+      res = self.client().post('/search', 
+      data=json.dumps(data),
+      content_type='application/json')
+
+      self.data = json.loads(res.data)
+      self.assertEqual(res.status_code, 200)
+      json_res = json.loads(res.get_data(as_text=True))
+
+    # error
+    def test_422_search_results_unprocesssable(self):
+
+      data = {
+        'searchTerm':'wxyz',
+      }
+
+      res = self.client().post('/search', 
+      data=json.dumps(data),
+      content_type='application/json')
+
+      self.data = json.loads(res.data)
+      self.assertEqual(res.status_code, 422)
+      json_res = json.loads(res.get_data(as_text=False))
+
+################################################################
+# test /categories/<int:id>/questions' GET
+
+    # success
+    def test_get_questions_by_categories(self):
+      res = self.client().get('/categories/<int:id>/questions')
+
+      # id = 6
+
+      # data = json.loads(res.data)
+      # self.assertEqual(res.status_code, 200)
+      # self.assertEqual(data['success'], True)
+      # self.assertTrue(data['questions'])
+      # self.assertTrue(len('categories'))
+
+    #error  
+    # def test_405_invalid_categories(self):
+    #   res = self.client().get('/questions/10000')
     #   data = json.loads(res.data)
-
-    #   self.assertEqual(res.status_code, 422)
+    #   self.assertEqual(res.status_code, 405)
     #   self.assertEqual(data['success'], False)
-    #   self.assertEqual(data['message'], 'Unprocessable')
 
 ################################################################
 
 print("hello first")
-
-
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
