@@ -2,9 +2,10 @@ import os
 import unittest 
 import json
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy import func, desc
 from flaskr import create_app
 from models import setup_db, Question, Category
+import logging
 
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
@@ -34,10 +35,19 @@ class TriviaTestCase(unittest.TestCase):
     Write at least one test for each test for successful operation and for expected errors.
     """
 
-    def test_given_behavior(self):
-        """Test Home page success """
+    def test_given_home_page_behavior(self):
+        """Test Home page GET success"""
         res = self.client().get('/')
         self.assertEqual(res.status_code, 200)
+        json_res = json.loads(res.get_data(as_text=True))
+        self.assertEqual('Home page', json_res['message'])
+
+    def test_404_home_page_not_found(self):
+        """Test Home page GET error"""
+        res = self.client().get('/home')
+        self.assertEqual(res.status_code, 404)
+        json_res = json.loads(res.get_data(as_text=False))
+        self.assertEqual('Resource Not found', json_res['message'])
 
 
     def test_get_categories(self):
@@ -74,58 +84,67 @@ class TriviaTestCase(unittest.TestCase):
       self.assertEqual(res.status_code, 405)
       self.assertEqual(data['success'], False)
 
-    #success 
-    # def test_delete_question(self):
-        #"""Test '/questions/<int:id>' DELETE success"""
-    #   id = 11
-    #   res = self.client().delete('/questions/id')
-    #   data = json.loads(res.data)
+ 
+    def test_delete_question(self):
+      """Test '/questions/<int:id>' DELETE success"""
 
-    #   question = Question.query.filter(Question.id == id).one_or_none()
+      #insert question to delete
+      self.test_add_question()
 
-    #   self.assertEqual(res.status_code, 200)
-    #   self.assertEqual(data['success'], True)
+      #get object of inserted question to be deleted
+      selected = Question.query.order_by(desc(Question.id)).limit(1)
+    
+      #format object > list > id used for deletion
+      selected_id = [id.format() for id in selected]
+      print('********Delete selected_id: %s' % selected_id)
 
-    def test_404_sent_requesting_invalid_number_questions(self):
-      """Test '/questions/<int:id>' DELETE error"""  
-      id = 11
-      res = self.client().delete('/questions/id')
+      dict = selected_id[0]
+      print('********Delete id from list: %s' % dict)
+
+      delete_id = int(dict['id'])
+      print('********Delete id from dict: %s' % delete_id)
+
+      #test delete given delete_id //not working
+      res = self.client().delete('/questions/<int:delete_id>')
       data = json.loads(res.data)
-      question = Question.query.filter(Question.id == id).all()
-      
-      self.assertEqual(res.status_code, 404)
+      self.assertEqual(res.status_code, 200)
+      self.assertEqual(data['success'], True)
+
+    def test_422_sent_requesting_invalid_number_questions(self):
+      """Test '/questions/<int:id>' DELETE error"""  
+      res = self.client().delete('/questions/0')
+      data = json.loads(res.data)    
+      self.assertEqual(res.status_code, 422)
       self.assertEqual(data['success'], False)
-      self.assertEqual(data['message'], 'Resource Not found')
+      self.assertEqual(data['message'], 'Unprocessable')
 
 
     def test_add_question(self):
       """Test /questions/add' POST success"""         
       data = {
-        'question':'New Question',
-        'answer':'New Answer',
+        'question':'Test Question',
+        'answer':'Test Answer',
         'category':'2',
         'difficulty':'1'
       }         
       res = self.client().post('/questions/add', 
       data=json.dumps(data),
       content_type='application/json')
-
       self.data = json.loads(res.data)
       self.assertEqual(res.status_code, 200)
       json_res = json.loads(res.get_data(as_text=True))
 
-    def test_404_invalid_category_payload(self):
+    def test_422_invalid_category_payload(self):
       """Test /questions/add' POST error"""         
       data = {
-        'question':'New Question',
-        'answer':'New Answer',
+        'question':'Test Question',
+        'answer':'Test Answer',
         'category':'10',
         'difficulty':'1'
       }     
       res = self.client().post('/questions/add', 
       data=json.dumps(data),
       content_type='application/json')
-
       self.data = json.loads(res.data)
       self.assertEqual(res.status_code, 422)
       json_res = json.loads(res.get_data(as_text=False))
@@ -137,7 +156,6 @@ class TriviaTestCase(unittest.TestCase):
       res = self.client().post('/search', 
       data=json.dumps(data),
       content_type='application/json')
-
       self.data = json.loads(res.data)
       self.assertEqual(res.status_code, 200)
       json_res = json.loads(res.get_data(as_text=True))
@@ -148,7 +166,6 @@ class TriviaTestCase(unittest.TestCase):
       res = self.client().post('/search', 
       data=json.dumps(data),
       content_type='application/json')
-
       self.data = json.loads(res.data)
       self.assertEqual(res.status_code, 422)
       json_res = json.loads(res.get_data(as_text=False))
@@ -158,13 +175,12 @@ class TriviaTestCase(unittest.TestCase):
       """Test '/categories/<int:id>/questions' GET success"""
       res = self.client().get('/categories/6/questions')
       data = json.loads(res.data)
-
       self.assertEqual(res.status_code, 200)
       self.assertEqual(data['success'], True)
       self.assertTrue(data['questions'])
       self.assertTrue(data['current_category'], 5)
   
-    def test_405_invalid_categories(self):
+    def test_404_invalid_categories(self):
       """Test '/categories/<int:id>/questions' GET error"""
       res = self.client().get('/categories/1000/questions')
       data = json.loads(res.data)
@@ -179,7 +195,6 @@ class TriviaTestCase(unittest.TestCase):
       res = self.client().post('/play', 
       data=json.dumps(data),
       content_type='application/json')
-
       self.assertEqual(res.status_code, 200)
       json_res = json.loads(res.get_data(as_text=True))
 
@@ -189,7 +204,6 @@ class TriviaTestCase(unittest.TestCase):
       res = self.client().post('/play', 
       data=json.dumps(data),
       content_type='application/json')
-
       self.assertEqual(res.status_code, 422)
       json_res = json.loads(res.get_data(as_text=False))
 

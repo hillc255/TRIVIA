@@ -48,7 +48,8 @@ def create_app(test_config=None):
   @app.route('/')
   def hello():
     return jsonify({
-      'success': True
+      'success': True,
+      'message': 'Home page'
     }), 200
 
   '''
@@ -74,8 +75,6 @@ def create_app(test_config=None):
   Create an endpoint to handle GET requests 
   for all available categories.
   '''
-  #revised based on 
-  #https://knowledge.udacity.com/questions/280959#284132
 
   @app.route('/categories', methods=['GET']) 
   def get_categories():
@@ -85,7 +84,7 @@ def create_app(test_config=None):
 
     for category in categories:
       formatted_categories[category.id] = category.type
-    print('formatted_categories %s' % formatted_categories)
+    #print('formatted_categories %s' % formatted_categories)
 
     return jsonify({
       'success': True,
@@ -316,35 +315,35 @@ def create_app(test_config=None):
     data = request.get_json()
 
     previous_questions = data.get('previous_questions', None)
-    print('This is previous_questions: %s' % previous_questions)
+    #print('This is previous_questions: %s' % previous_questions)
     
     quiz_category = data.get('quiz_category')
-    print('This is quiz_category: %s' % quiz_category)
+    #print('This is quiz_category: %s' % quiz_category)
 
     try:
       #specific quiz_category is not selected  
-      print('Quiz category None Before')
+      #print('Quiz category None Before')
       if (quiz_category["type"]) == "click":
-        print('Quiz category None After')
+        #print('Quiz category None After')
         selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()       
-        print('Selected result:  %s' % selected)
+        #print('Selected result:  %s' % selected)
 
       else:
         #quiz_category is specified
-        print('There is a quiz_category')
+        #print('There is a quiz_category')
         selected = Question.query.filter(Question.category == quiz_category["id"]).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-        print('Selected result:  %s' % selected)
+        #print('Selected result:  %s' % selected)
      
       #if a question is returned - format it
       if len(selected) != 0:
-        print('Value is selected: %s' % selected)
+        #print('Value is selected: %s' % selected)
 
         selected_question = [question.format() for question in selected]
-        print('Selected object: %s' % selected_question)
+        #print('Selected object: %s' % selected_question)
 
         #remove brackets from question
         question = selected_question[0]
-        print('Remove [ %s' % question)
+        #print('Remove [ %s' % question)
 
         result = {
           'success': True,
