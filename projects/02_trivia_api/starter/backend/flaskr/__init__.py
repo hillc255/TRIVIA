@@ -158,7 +158,7 @@ def create_app(test_config=None):
       abort(422)
 
   '''
-  @TODO - Done - add without question and answer - check: 
+  @TODO - Done: 
   Create an endpoint to POST a new question, 
   which will require the question and answer text, 
   category, and difficulty score.

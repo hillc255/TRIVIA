@@ -88,7 +88,49 @@ GET '/categories'
 '6' : "Sports"}
 
 ```
+GET '/questions'
+- Fetches list of questions grouped by category with pagination every 10 questions per page.
+- Request Arguments: None
+- Returns: An object with list of questions, integer of question count, and categories_string key:value pairs. 
 
+{'id': 9,
+'question': 'What boxer's original name is Cassius Clay?'
+'answer': 'Muhammad Ali',
+'difficulty': 1,
+'category': 4}
+
+```
+DELETE '/questions/<int:id>'
+- Fetches single id of questions object and deletes that object from the database
+- Request Arguments: Unique id - primary key: value - of a single questions object
+- Returns: Object id of the question deleted, the list of questions in remaining objects and 
+questions_integer of total questions remaining.
+
+```
+POST '/questions/add'
+- Fetches from user input added question object dictionary with question, answer, category and difficulty.
+- Request Arguments: Input questions object dictionary with strings for question and answer, integers for category and difficulty.
+- Returns: None
+
+```
+POST '/search'
+- Fetches object question list which has the string within the questions.
+- Request Arguments: Input string used to search questions list.
+- Returns: Formatted object question list and integer count of questions returned from matching string.
+
+```
+GET '/categories/<int:id>/questions'
+- Fetches list of all questions by category integer.
+- Request Arguments: Category string id of id:value pair.
+- Returns: Object list of questions by category, integer with total count of the questions, category string id.
+
+```
+POST '/play'
+- Fetches list of questions by category and list of previous question id parameters.
+- Request Arguments: Object list of questions and question integer ids by category string id of id:value pair.
+- Returns: Random question string from object for category string and list of previous questions including the random question returned.
+
+``
 
 ## Testing
 To run the tests, run
