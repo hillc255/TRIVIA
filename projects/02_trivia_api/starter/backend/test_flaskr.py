@@ -91,7 +91,7 @@ class TriviaTestCase(unittest.TestCase):
       #insert question to delete
       self.test_add_question()
 
-      #get object of inserted question to be deleted
+      #get id from object of inserted question to be deleted
       selected = Question.query.order_by(desc(Question.id)).limit(1)
     
       #format object > list > id used for deletion
@@ -101,11 +101,11 @@ class TriviaTestCase(unittest.TestCase):
       dict = selected_id[0]
       print('********Delete id from list: %s' % dict)
 
-      delete_id = int(dict['id'])
-      print('********Delete id from dict: %s' % delete_id)
+      delete_id = dict['id']
+      print('********Delete id from dict: %s' % delete_id)       
 
-      #test delete given delete_id //not working
-      res = self.client().delete('/questions/<int:delete_id>')
+      param = {'id' : delete_id}
+      res = self.client().delete('/questions/{id}'.format(**param))
       data = json.loads(res.data)
       self.assertEqual(res.status_code, 200)
       self.assertEqual(data['success'], True)
