@@ -93,17 +93,11 @@ class TriviaTestCase(unittest.TestCase):
 
       #get id from object of inserted question to be deleted
       selected = Question.query.order_by(desc(Question.id)).limit(1)
-    
-      #format object > list > id used for deletion
       selected_id = [id.format() for id in selected]
-      print('********Delete selected_id: %s' % selected_id)
-
       dict = selected_id[0]
-      print('********Delete id from list: %s' % dict)
+      delete_id = dict['id']      
 
-      delete_id = dict['id']
-      print('********Delete id from dict: %s' % delete_id)       
-
+      #pass parameter into url
       param = {'id' : delete_id}
       res = self.client().delete('/questions/{id}'.format(**param))
       data = json.loads(res.data)
