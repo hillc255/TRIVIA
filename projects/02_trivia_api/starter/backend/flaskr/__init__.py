@@ -84,7 +84,6 @@ def create_app(test_config=None):
 
     for category in categories:
       formatted_categories[category.id] = category.type
-    #print('formatted_categories %s' % formatted_categories)
 
     return jsonify({
       'success': True,
@@ -92,10 +91,6 @@ def create_app(test_config=None):
       'total_categories': len(categories)
     }), 200  
 
-    #Test categories endpoint
-    #curl http://127.0.0.1:5000/categories
-    #curl -X GET http://127.0.0.1:5000/categories
-    #curl -X GET http://127.0.0.1:5000/categories?page=1000
 
   '''
   @TODO - Done: 
@@ -113,22 +108,18 @@ def create_app(test_config=None):
   @app.route('/questions', methods=['GET'])
   def get_questions():
   
-    #query all questions, group by category, id then paginate the questions
     selection = Question.query.order_by(Question.category, Question.id).group_by(Question.category, Question.id).all()
     current_questions = paginate_questions(request, selection)
 
     if len(current_questions) == 0:
       abort(404)
 
-    #query all the categories
     categories = Category.query.all()
 
-    #format the category items
     formatted_categories = {
       category.id: category.type for category in categories
     }
 
-    #return list of questions ordered by categories and id
     return jsonify({
       'success': True,
       'questions': current_questions,
@@ -136,12 +127,6 @@ def create_app(test_config=None):
       'current_category': None,
       'categories': formatted_categories
     })
-
-    #Test questions endpoint
-    #curl http://127.0.0.1:5000/questions
-    #curl -X GET http://127.0.0.1:5000/questions
-    #might not work  - curl -X GET http://127.0.0.1:5000/questions/?page/=1
-    #http://127.0.0.1:5000/questions?page=3
 
   '''
   @TODO - Done: 
@@ -171,9 +156,6 @@ def create_app(test_config=None):
 
     except:
       abort(422)
-
-    #Test delete endpoint
-    #curl -X DELETE http://127.0.0.1:5000/questions/26
 
   '''
   @TODO - Done - add without question and answer - check: 
@@ -211,10 +193,6 @@ def create_app(test_config=None):
     except:
       abort(422)
       
-  
-#Test add new question
-# curl --header "Content-Type: application/json" --request POST --data '{"question":"Test question","answer":"Test answer","category":"1","difficulty":4}' http://127.0.0.1:5000/questions/add
-# curl --header "Content-Type: application/json" --request POST --data '{"question":"Test question6","answer":"Test answer6","category":"6","difficulty":6}' http://localhost:3000/questions/add
  
   '''
   @TODO - Done: 
@@ -229,7 +207,6 @@ def create_app(test_config=None):
   @app.route('/search', methods=['POST'])
   def search_question():
                
-    #get searchterm
     data = request.get_json()
     if data.get('searchTerm') is not None:
       search_term = data.get('searchTerm')
@@ -252,10 +229,6 @@ def create_app(test_config=None):
       except:
         abort(422)
 
-  #test endpoint
-  # curl -X POST -H "Content-Type: application/json" -d '{"searchTerm":"title"}' http://127.0.0.1:5000/search
-  # curl -X POST -H "Content-Type: application/json" -d '{"searchTerm":"organ"}' http://localhost:3000/search
- 
   '''
   @TODO - Done: 
   Create a GET endpoint to get questions based on category. 
@@ -267,22 +240,18 @@ def create_app(test_config=None):
   @app.route('/categories/<int:id>/questions', methods=['GET'])
   def get_questions_by_category(id):
     
-    #get the category id
     category = Category.query.filter_by(id=id).one_or_none()
 
     if (category is None):
       abort(404)
 
-    #get all questions with the category
     result = Question.query.filter_by(category=id).all()
 
     if len(result) == 0:
       abort(404)
 
-    #get all formatted questions
     formatted_questions = [question.format() for question in result]
     
-    #paginate results
     current_questions=paginate_questions(request, result)
 
     return jsonify({
@@ -291,10 +260,7 @@ def create_app(test_config=None):
       'total_questions': len(current_questions),
       'current_category': id
     }), 200
-    
-    #Test selected cateories endpoints
-    #curl -X GET http://127.0.0.1:5000/categories/2/questions
-    #http://127.0.0.1:5000/categories/2/questions
+  
 
   '''
   @TODO - Done:
@@ -313,37 +279,25 @@ def create_app(test_config=None):
     
     #data from previous question by category
     data = request.get_json()
-
-    previous_questions = data.get('previous_questions', None)
-    #print('This is previous_questions: %s' % previous_questions)
-    
+    previous_questions = data.get('previous_questions', None)   
     quiz_category = data.get('quiz_category')
-    #print('This is quiz_category: %s' % quiz_category)
 
     try:
       #specific quiz_category is not selected  
-      #print('Quiz category None Before')
       if (quiz_category["type"]) == "click":
-        #print('Quiz category None After')
         selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()       
-        #print('Selected result:  %s' % selected)
 
       else:
         #quiz_category is specified
-        #print('There is a quiz_category')
         selected = Question.query.filter(Question.category == quiz_category["id"]).filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()
-        #print('Selected result:  %s' % selected)
      
       #if a question is returned - format it
       if len(selected) != 0:
-        #print('Value is selected: %s' % selected)
 
         selected_question = [question.format() for question in selected]
-        #print('Selected object: %s' % selected_question)
 
         #remove brackets from question
         question = selected_question[0]
-        #print('Remove [ %s' % question)
 
         result = {
           'success': True,
@@ -357,12 +311,6 @@ def create_app(test_config=None):
             
     except:
       abort(422)
-
-    #Test random question endpoints
-    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16,18], "quizCategory": "0"}' http://localhost:3000/play
-    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16,18,19], "quiz_category": ""}' http://127.0.0.1:5000/play
-    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [17,18,19], "quiz_category": "2"}' http://localhost:3000/play
-    #curl --header "Content-Type: application/json" --request POST --data '{"previousQuestions": [16],"quizCategory": "2"}' http://127.0.0.1:5000/play
 
   '''
   @TODO - Done
