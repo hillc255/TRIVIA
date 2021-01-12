@@ -20,9 +20,6 @@ def paginate_categories(request, selection):
     current_categories = categories[start:end]
     return current_categories
 
-    print(item_to_be_checked)
-
-
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -31,9 +28,6 @@ def paginate_questions(request, selection):
     questions = [question.format() for question in selection]
     current_questions = questions[start:end]
     return current_questions
-
-    print(item_to_be_checked)
-
 
 def create_app(test_config=None):
     # create and configure the app
