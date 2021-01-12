@@ -293,7 +293,7 @@ def create_app(test_config=None):
 
     try:
 
-      if(quiz_category["id"]) is None:
+      if not quiz_category:
         abort(422)
 
       #specific quiz_category is not selected  
