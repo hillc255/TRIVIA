@@ -82,13 +82,17 @@ def create_app(test_config=None):
     categories = Category.query.all()  
     formatted_categories = {}
 
+    count_categories = 0
+
     for category in categories:
       formatted_categories[category.id] = category.type
+      
+      count_categories += 1
 
     return jsonify({
       'success': True,
       'categories': formatted_categories,
-      'total_categories': len(categories)
+      'total_categories': count_categories
     }), 200  
 
 
@@ -182,13 +186,18 @@ def create_app(test_config=None):
       if not ('question' in data and 'answer' in data and 'category' in data and 'difficulty' in data):
         abort(422)
 
-      if data:  
-        question = Question(**data)
-        question.insert()
+      data_category = int(data['category'])
+      data_difficulty = int(data['difficulty'])
+      
+      if not ( 1 <= data_category <= 6 ) and (1 <= data_difficulty <=4) :
+        abort(422)
 
-        return jsonify({
-          'success': True 
-        }), 200
+      question = Question(**data)
+      question.insert()
+
+      return jsonify({
+        'success': True 
+      }), 200
 
     except:
       abort(422)
@@ -283,6 +292,10 @@ def create_app(test_config=None):
     quiz_category = data.get('quiz_category')
 
     try:
+
+      if(quiz_category["id"]) is None:
+        abort(422)
+
       #specific quiz_category is not selected  
       if (quiz_category["type"]) == "click":
         selected = Question.query.filter(Question.id.notin_(previous_questions)).order_by(func.random()).limit(1).all()       
@@ -322,7 +335,7 @@ def create_app(test_config=None):
     return jsonify({
       "success": False,
       "error": 404,
-      "message": "Resource Not found"
+      "message": "Resource Not Found"
       }), 404
 
   @app.errorhandler(422)

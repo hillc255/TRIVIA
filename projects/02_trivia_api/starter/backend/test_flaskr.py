@@ -47,7 +47,7 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().get('/home')
         self.assertEqual(res.status_code, 404)
         json_res = json.loads(res.get_data(as_text=False))
-        self.assertEqual('Resource Not found', json_res['message'])
+        self.assertEqual('Resource Not Found', json_res['message'])
 
 
     def test_get_categories(self):
@@ -57,7 +57,7 @@ class TriviaTestCase(unittest.TestCase):
       self.assertEqual(res.status_code, 200)
       self.assertEqual(data['success'], True)
       self.assertTrue(data['categories'])
-      self.assertTrue(len('categories'))
+      self.assertTrue(data['total_categories'])
 
     def test_404_total_categories_not_equals_seven(self):
       """Test '/categories' GET error"""
@@ -65,7 +65,7 @@ class TriviaTestCase(unittest.TestCase):
       data = json.loads(res.data)
       self.assertEqual(res.status_code, 404)
       self.assertEqual(data['success'], False)
-      self.assertEqual(data['message'], 'Resource Not found')
+      self.assertEqual(data['message'], 'Resource Not Found')
 
 
     def test_get_questions(self):
@@ -75,7 +75,9 @@ class TriviaTestCase(unittest.TestCase):
       self.assertEqual(res.status_code, 200)
       self.assertEqual(data['success'], True)
       self.assertTrue(data['questions'])
-      self.assertTrue(len('categories'))
+      self.assertTrue(data['total_questions'])
+      self.assertTrue('current_categories', None)
+      self.assertTrue(data['categories'])
 
     def test_405_sent_requesting_invalid_number_questions(self):
       """Test '/questions' GET error"""
@@ -83,6 +85,7 @@ class TriviaTestCase(unittest.TestCase):
       data = json.loads(res.data)
       self.assertEqual(res.status_code, 405)
       self.assertEqual(data['success'], False)
+      self.assertEqual(data['message'], 'Method Not Allowed')
 
  
     def test_delete_question(self):
@@ -180,7 +183,7 @@ class TriviaTestCase(unittest.TestCase):
       data = json.loads(res.data)
       self.assertEqual(res.status_code, 404)
       self.assertEqual(data['success'], False)
-      self.assertEqual(data['message'], 'Resource Not found')
+      self.assertEqual(data['message'], 'Resource Not Found')
 
 
     def test_post_play_quiz(self):
