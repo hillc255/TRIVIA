@@ -107,13 +107,13 @@ class TriviaTestCase(unittest.TestCase):
       self.assertEqual(res.status_code, 200)
       self.assertEqual(data['success'], True)
 
-    def test_422_sent_requesting_invalid_number_questions(self):
+    def test_404_sent_requesting_invalid_number_questions(self):
       """Test '/questions/<int:id>' DELETE error"""  
       res = self.client().delete('/questions/0')
       data = json.loads(res.data)    
-      self.assertEqual(res.status_code, 422)
+      self.assertEqual(res.status_code, 404)
       self.assertEqual(data['success'], False)
-      self.assertEqual(data['message'], 'Unprocessable')
+      self.assertEqual(data['message'], 'Resource Not Found')
 
 
     def test_add_question(self):
@@ -157,14 +157,14 @@ class TriviaTestCase(unittest.TestCase):
       self.assertEqual(res.status_code, 200)
       json_res = json.loads(res.get_data(as_text=True))
 
-    def test_422_search_results_unprocesssable(self):
+    def test_404_search_results_unprocesssable(self):
       """Test '/search' POST error"""
       data = {'searchTerm':'wxyz'}
       res = self.client().post('/search', 
       data=json.dumps(data),
       content_type='application/json')
       self.data = json.loads(res.data)
-      self.assertEqual(res.status_code, 422)
+      self.assertEqual(res.status_code, 404)
       json_res = json.loads(res.get_data(as_text=False))
 
 
@@ -197,7 +197,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_422_invalid_play_quiz(self):
       """Test '/play', POST error""" 
-      data = {'previous_questions': '2', 'quiz_category': {'id':'','type':''}}
+      data = {'previous_questions': '2', 'quiz_category': {'id':' ','type':''}}
       res = self.client().post('/play', 
       data=json.dumps(data),
       content_type='application/json')

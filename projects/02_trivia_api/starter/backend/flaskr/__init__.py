@@ -20,6 +20,7 @@ def paginate_categories(request, selection):
     current_categories = categories[start:end]
     return current_categories
 
+
 def paginate_questions(request, selection):
     page = request.args.get('page', 1, type=int)
     start = (page - 1) * QUESTIONS_PER_PAGE
@@ -28,6 +29,7 @@ def paginate_questions(request, selection):
     questions = [question.format() for question in selection]
     current_questions = questions[start:end]
     return current_questions
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -129,7 +131,7 @@ def create_app(test_config=None):
           'total_questions': len(Question.query.all()),
           'current_category': None,
           'categories': formatted_categories
-        })
+        }), 200
 
     '''
     @TODO - Done:
@@ -158,8 +160,9 @@ def create_app(test_config=None):
               'total_questions': len(Question.query.all())
             }), 200
 
-        except Exception:
-            abort(422)
+        except Exception as e:
+            print('\n'+'Error deleting record: ', e)
+            abort(404)
 
     '''
     @TODO - Done:
@@ -200,7 +203,8 @@ def create_app(test_config=None):
               'success': True
             }), 200
 
-        except Exception:
+        except Exception as e:
+            print('\n'+'Error adding record: ', e)
             abort(422)
 
     '''
@@ -236,8 +240,9 @@ def create_app(test_config=None):
                   'current_category': None
                 }), 200
 
-            except Exception:
-                abort(422)
+            except Exception as e:
+                print('\n'+'Error searching: ', e)
+                abort(404)
 
     '''
     @TODO - Done:
@@ -321,7 +326,8 @@ def create_app(test_config=None):
                 }
             return jsonify(result)
 
-        except Exception:
+        except Exception as e:
+            print('\n'+'Error retrieving question: ', e)
             abort(422)
 
     '''
