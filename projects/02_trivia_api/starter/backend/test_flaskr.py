@@ -175,7 +175,7 @@ class TriviaTestCase(unittest.TestCase):
       self.assertEqual(res.status_code, 200)
       self.assertEqual(data['success'], True)
       self.assertTrue(data['questions'])
-      self.assertTrue(data['current_category'], 5)
+      self.assertTrue(data['current_category'], 6)
   
     def test_404_invalid_categories(self):
       """Test '/categories/<int:id>/questions' GET error"""
@@ -197,7 +197,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_422_invalid_play_quiz(self):
       """Test '/play', POST error""" 
-      data = {'previous_questions': '2', 'quiz_category': {'id':' ','type':''}}
+      data = {'previous_questions': '2', 'quiz_category': {}}
       res = self.client().post('/play', 
       data=json.dumps(data),
       content_type='application/json')

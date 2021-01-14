@@ -259,7 +259,7 @@ def create_app(test_config=None):
         if (category is None):
             abort(404)
 
-        result = Question.query.filter_by(category=id).all()
+        result = Question.query.filter(Question.category == str(id)).all()
 
         if len(result) == 0:
             abort(404)
